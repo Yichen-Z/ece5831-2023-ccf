@@ -34,4 +34,6 @@ if __name__ == '__main__':
     raw_df = save_space(df=raw_df)
     set_zero_padded_cols(columns=['Month', 'Day'], df=raw_df)
     combine_date_cols(columns=['Year', 'Month', 'Day'], result_col='transaction_datetime',
-                      format_str='%Y-%m-%d')
+                      format_str='%Y-%m-%d', df=raw_df)
+    raw_df['Time'] = pd.to_datetime(raw_df['Time'], format='%H:%M', errors='coerce').dt.time
+    joblib.dump(raw_df, '../data/transactions')
