@@ -3,6 +3,13 @@ import numpy as np
 import os
 import pandas as pd
 
+COL_NAMES = ['User','Card','Year','Month','Day','Time','Amount','Use_Chip',
+             'Merchant_Name','Merchant_City','Merchant_State','Zip','MCC','Errors','Is_Fraud']
+PARSE_DATES = ['Year', 'Month', 'Day', 'Time']
+FROM_DIR = '../data/split'
+TO_DIR = '../data/slim'
+PART_NAME = 'transactions'
+
 
 def save_space(df: pd.DataFrame) -> pd.DataFrame:
     df['User'] = df['User'].astype(np.int8)
@@ -31,17 +38,13 @@ def combine_date_cols(columns: list, result_col: str, df: pd.DataFrame, format_s
 
 
 if __name__ == '__main__':
-    COL_NAMES = ['User','Card','Year','Month','Day','Time','Amount','Use_Chip',
-                 'Merchant_Name','Merchant_City','Merchant_State','Zip','MCC','Errors','Is_Fraud']
-    PARSE_DATES = ['Year', 'Month', 'Day', 'Time']
-    dir = '../data/split'
-    parts = [f for f in os.listdir(dir)]
+    parts = [f for f in os.listdir(FROM_DIR)]
     print(parts)
     i = 0
     for part in parts:
-        temp_df = pd.read_csv(os.path.join(dir, part), header=None, names=COL_NAMES)
+        temp_df = pd.read_csv(os.path.join(FROM_DIR, part), header=None, names=COL_NAMES)
         combine_date_cols(columns=PARSE_DATES, result_col='Datetime', df=temp_df)
         get_numeric_amount(df=temp_df)
         temp_df = save_space(temp_df)
-        joblib.dump(temp_df, f'../data/slim/transactions_{i}')
+        joblib.dump(temp_df, f'{TO_DIR}/{PART_NAME}_{i}')
         i += 1
