@@ -34,10 +34,12 @@ if __name__ == '__main__':
     COL_NAMES = ['User','Card','Year','Month','Day','Time','Amount','Use_Chip',
                  'Merchant_Name','Merchant_City','Merchant_State','Zip','MCC','Errors','Is_Fraud']
     PARSE_DATES = ['Year', 'Month', 'Day', 'Time']
-    parts = [f for f in os.listdir('../data/split/') if f.endswith('.csv')]
+    dir = '../data/split'
+    parts = [f for f in os.listdir(dir)]
+    print(parts)
     i = 0
     for part in parts:
-        temp_df = pd.read_csv(part, header=None, names=COL_NAMES)
+        temp_df = pd.read_csv(os.path.join(dir, part), header=None, names=COL_NAMES)
         combine_date_cols(columns=PARSE_DATES, result_col='Datetime', df=temp_df)
         get_numeric_amount(df=temp_df)
         temp_df = save_space(temp_df)
