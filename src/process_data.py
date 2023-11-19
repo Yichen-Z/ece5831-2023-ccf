@@ -12,9 +12,9 @@ PART_NAME = 'transactions'
 
 
 def save_space(df: pd.DataFrame) -> pd.DataFrame:
-    df['User'] = df['User'].astype(np.int8)
     df['Card'] = df['Card'].astype(np.int8)
     df = get_slimmed_numerics(df)
+    df['Is_Fraud'] = df['Is_Fraud'].apply(lambda word: True if word.lower() == 'yes' else False)
     df['Use_Chip'] = df['Use_Chip'].apply(lambda word: word.split()[0])
     return df
 

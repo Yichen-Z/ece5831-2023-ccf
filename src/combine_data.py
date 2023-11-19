@@ -13,4 +13,5 @@ if __name__ == '__main__':
         dfs.append(joblib.load(os.path.join(TO_DIR, part)))
     
     tdf = pd.concat(dfs)
+    tdf = tdf.sort_values(by=['Datetime'])
     joblib.dump(tdf, f'../data/{PART_NAME}')

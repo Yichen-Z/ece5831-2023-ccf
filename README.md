@@ -18,13 +18,15 @@ TODO
 
 2) Download data from [IBM Synthetic Credit Card Transactions Dataset on Kaggle](https://www.kaggle.com/datasets/ealtman2019/credit-card-transactions), unzip, and move into the **data/** directory
 
-3) To make the transactions data take up less space, first run src/processs_data.py from the terminal:
+3) Ease processing by first splitting up the transactions csv into smaller chunks. In the terminal:
     ```
-    cd src
-    python -m process_data
+    cd data
+    ./split_transactions.sh
     ```
 
-    Then run src/combine_data.py from the terminal:
+4) Delete the header line from data/split/part00.csv. Then, to make the transactions data take up less space, first run in the terminal:
     ```
+    cd ../src
+    python -m process_data
     python -m combine_data
     ```
