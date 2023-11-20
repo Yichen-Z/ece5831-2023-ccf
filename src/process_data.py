@@ -11,9 +11,8 @@ TO_DIR = '../data/slim'
 PART_NAME = 'transactions'
 
 
-def save_space(df: pd.DataFrame) -> pd.DataFrame:
-    df['Card'] = df['Card'].astype(np.int8)
-    df = get_slimmed_numerics(df)
+def save_space(df: pd.DataFrame, basic: bool) -> pd.DataFrame:
+    df = get_slimmed_numerics(df, basic)
     df['Is_Fraud'] = df['Is_Fraud'].apply(lambda word: True if word.lower() == 'yes' else False)
     df['Use_Chip'] = df['Use_Chip'].apply(lambda word: word.split()[0])
     return df
@@ -24,9 +23,32 @@ def get_numeric_amount(df: pd.DataFrame) -> None:
     df['Amount'] = df['Amount'].astype('float32')
 
 
-def get_slimmed_numerics(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.astype({col: 'int32' for col in df.select_dtypes('int64').columns})
-    df = df.astype({col: 'float32' for col in df.select_dtypes('float64').columns})
+def get_slimmed_numerics(df: pd.DataFrame, basic: bool) -> pd.DataFrame:
+    """Adapted from Konrad Banachewicz reduce_mem_usage"""
+    if basic:
+        df = df.astype({col: 'int32' for col in df.select_dtypes('int64').columns})
+        df = df.astype({col: 'float32' for col in df.select_dtypes('float64').columns})
+    else:
+        for col in df.select_dtypes(include=[np.number]).columns:
+            col_type = df[col].dtype
+            col_min = df[col].min()
+            col_max = df[col].max()
+            if str(col_type)[:3] == 'int':
+                if col_min >= np.iinfo(np.int8).min and col_max <= np.iinfo(np.int8).max:
+                    df[col] = df[col].astype(np.int8)
+                elif col_min >= np.iinfo(np.int16).min and col_max <= np.iinfo(np.int16).max:
+                    df[col] = df[col].astype(np.int16)
+                elif col_min >= np.iinfo(np.int32).min and col_max <= np.iinfo(np.int32).max:
+                    df[col] = df[col].astype(np.int32)
+                elif col_min >= np.iinfo(np.int64).min and col_max <= np.iinfo(np.int64).max:
+                    df[col] = df[col].astype(np.int64)
+            else:
+                if col_min >= np.finfo(np.float16).min and col_max <= np.finfo(np.float16).max:
+                    df[col] = df[col].astype(np.float16)
+                elif col_min >= np.finfo(np.float32).min and col_max <= np.finfo(np.float32).max:
+                    df[col] = df[col].astype(np.float32)
+                elif col_min >= np.finfo(np.float64).min and col_max <= np.finfo(np.float64).max:
+                    df[col] = df[col].astype(np.float64)
     return df
 
 
@@ -45,6 +67,6 @@ if __name__ == '__main__':
         temp_df = pd.read_csv(os.path.join(FROM_DIR, part), header=None, names=COL_NAMES)
         combine_date_cols(columns=PARSE_DATES, result_col='Datetime', df=temp_df)
         get_numeric_amount(df=temp_df)
-        temp_df = save_space(temp_df)
+        temp_df = save_space(df=temp_df, basic=False)
         joblib.dump(temp_df, f'{TO_DIR}/{PART_NAME}_{i}')
         i += 1
