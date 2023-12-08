@@ -20,7 +20,7 @@ def normalize_transaction_data(df: pd.DataFrame, err_col: str = 'Errors') -> Non
     df = get_slimmed_numerics(df)
 
 
-def save_space(df: pd.DataFrame, basic: bool) -> pd.DataFrame:
+def save_space(df: pd.DataFrame) -> pd.DataFrame:
     df['Is_Fraud'] = df['Is_Fraud'].apply(lambda word: 1. if word.lower() == 'yes' else 0.)
     df['Use_Chip'] = df['Use_Chip'].apply(lambda word: word.split()[0])
     df = get_slimmed_numerics(df)
@@ -83,6 +83,6 @@ if __name__ == '__main__':
         temp_df = pd.read_csv(os.path.join(FROM_DIR, part), header=None, names=COL_NAMES)
         combine_date_cols(columns=PARSE_DATES, result_col='Datetime', df=temp_df)
         get_numeric_amount(df=temp_df)
-        temp_df = save_space(df=temp_df, basic=True)
+        temp_df = save_space(df=temp_df)
         joblib.dump(temp_df, f'{TO_DIR}/{PART_NAME}_{i}')
         i += 1
